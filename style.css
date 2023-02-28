@@ -1,0 +1,62 @@
+body {
+    -webkit-perspective: 300;
+    perspective: 300;
+}
+
+h1 {
+    text-align: center;
+}
+
+div#board {
+    max-width: 480px;
+    margin: 0 auto;
+    border: 10px solid #000;
+    transform: rotateX(8deg);
+}
+
+div#board > div {
+    width: 60px;
+    height: 60px;
+    display: inline-block;
+}
+
+div#board .even {
+    background-color: white;
+}
+
+div#board .odd {
+    background-color: darkcyan;
+}
+
+div#board .playable {
+    background-color: orange;
+}
+
+div#board .playable:hover {
+    cursor: pointer;
+}
+
+.piece {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 5px;
+    box-shadow: 1px 1px 2px 1px #000;
+}
+
+.piece.white {
+    background-color: #fff;
+}
+
+.piece.black {
+    background-color: #000;
+}
+
+.piece.selected {
+    background-color: red;
+}
+
+.piece:not(.disabled):hover {
+    background-color: red;
+    cursor: pointer;
+}
