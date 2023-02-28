@@ -1,5 +1,6 @@
 var board = document.getElementById('board');
 var deleteablePieces = [];
+var nonPlayable = [];
 
 var game = {
     colors: ['black', 'white'],
@@ -58,7 +59,13 @@ var game = {
                         
                         piece.classList.add('selected');
                         
-                        game.pieceMoves(piece);
+                        let cell = piece.parentNode;
+                        let cellIndex = Array.prototype.indexOf.call(board.children, cell);
+                        game.capture(cellIndex);
+
+                        if (!deleteablePieces.length) {
+                            game.pieceMoves(piece);
+                        }
 
                         game.cellActions();
                     }
@@ -71,7 +78,9 @@ var game = {
     pieceMoves: function (piece) {
         let cell = piece.parentNode;
         let cellIndex = Array.prototype.indexOf.call(board.children, cell);
-        
+
+        game.capture(cellIndex);
+
         const possibleMoves = {
             down: [-7, -9],
             up: [7, 9] 
@@ -82,26 +91,37 @@ var game = {
                 moves.forEach(move => {
                     let newIndex = cellIndex + move;
                     
-                    if (board.children[newIndex] && board.children[newIndex].classList.contains('odd')) {
-
-                        if (board.children[newIndex].hasChildNodes()) {
-                            if (!board.children[newIndex].firstChild.classList.contains(upOrDown)) {
-                                let adversaryPieceIndex = Array.prototype.indexOf.call(board.children, board.children[newIndex]);
-                                newIndex = (adversaryPieceIndex + move);
-
-                                if (board.children[newIndex].classList.contains('odd') && !board.children[newIndex].hasChildNodes()) {
-                                    deleteablePieces.push([adversaryPieceIndex, newIndex]);
-                                }
-                            }
-                        }
-                        
-                        if (board.children[newIndex].classList.contains('odd') && !board.children[newIndex].hasChildNodes()) {
-                            board.children[newIndex].classList.add('playable');
-                        }
+                    if (board.children[newIndex] && board.children[newIndex].classList.contains('odd') && !board.children[newIndex].hasChildNodes()) {
+                        board.children[newIndex].classList.add('playable');
                     }
                 });
             }
         });
+    },
+    capture: function (cellIndex) {
+        let possibleMoves = [-7, -9, 7, 9];
+
+        possibleMoves.forEach(move => {
+            let newIndex = cellIndex + move;
+            
+            if (!nonPlayable.includes(newIndex)) {
+                if (board.children[newIndex] && board.children[newIndex].classList.contains('odd') && board.children[newIndex].hasChildNodes()) {
+                    if (!board.children[newIndex].firstChild.classList.contains(game.activeColor)) {
+                        let adversaryPieceIndex = Array.prototype.indexOf.call(board.children, board.children[newIndex]);
+                        newIndex = (adversaryPieceIndex + move);
+
+                        if (board.children[newIndex] && board.children[newIndex].classList.contains('odd') && !board.children[newIndex].hasChildNodes()) {
+                            deleteablePieces.push([adversaryPieceIndex, newIndex]);
+                            nonPlayable.push(adversaryPieceIndex);
+                            board.children[newIndex].classList.add('playable');
+                            game.capture(newIndex);
+                        }
+                    }
+                }
+            }
+        });
+
+        game.nonPlayable = [];
     },
     cellActions: function () {
         let playable = document.getElementsByClassName('playable');
@@ -109,23 +129,25 @@ var game = {
         for (let i = 0; i < playable.length; i++) {
             playable[i].onclick = function () {
                 let selected = document.getElementsByClassName('selected')[0];
-                selected.classList.remove('selected');
                 playable[i].appendChild(selected);
                 
                 if (deleteablePieces.length) {
                     let newIndex = Array.prototype.indexOf.call(board.children, playable[i]);
                     
-                    deleteablePieces.forEach(deleteablePiece => {
+                    deleteablePieces.forEach((deleteablePiece, index) => {
                         if (newIndex == deleteablePiece[1]) {
                             board.children[deleteablePiece[0]].firstChild.remove();
+                            deleteablePieces.splice(index, 1);
                         }
-
-                        deleteablePieces = [];
                     });
                 }
 
-                game.changeColor();
-                game.clearPlayable();
+                if (!deleteablePieces.length) {
+                    selected.classList.remove('selected');
+                    game.clearPlayable();
+                    game.changeColor();
+                }
+                
                 game.pieceActions();
             }
         }
