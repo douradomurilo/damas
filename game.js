@@ -63,11 +63,11 @@ var game = {
                         let cell = piece.parentNode;
                         let cellIndex = Array.prototype.indexOf.call(board.children, cell);
                         
-                        game.capture(cellIndex);
+                        game.capture(cellIndex, piece.classList.contains('dama'));
                         nonPlayable = [];
 
                         if (!deleteablePieces.length) {
-                            game.pieceMoves(piece);
+                            game.pieceMoves(piece, piece.classList.contains('dama'));
                         }
 
                         game.cellActions();
@@ -78,29 +78,57 @@ var game = {
             }
         }
     },
-    pieceMoves: function (piece) {
+    pieceMoves: function (piece, isDama = false) {
+
+        game.damaMoves(piece);
+
+        if (!isDama) {
+            let cell = piece.parentNode;
+            let cellIndex = Array.prototype.indexOf.call(board.children, cell);
+
+            const possibleMoves = {
+                down: [-7, -9],
+                up: [7, 9] 
+            };
+
+            Object.entries(possibleMoves).forEach(([upOrDown, moves]) => {    
+                if (piece.classList.contains(upOrDown)) {
+                    moves.forEach(move => {
+                        let newIndex = cellIndex + move;
+                        
+                        if (board.children[newIndex] && board.children[newIndex].classList.contains('odd') && !board.children[newIndex].hasChildNodes()) {
+                            board.children[newIndex].classList.add('playable');
+                        }
+                    });
+                }
+            });
+        }
+    },
+    damaMoves: function (piece) {
+        if (!piece.classList.contains('dama')) {
+            return false;
+        }
+
         let cell = piece.parentNode;
         let cellIndex = Array.prototype.indexOf.call(board.children, cell);
 
-        const possibleMoves = {
-            down: [-7, -9],
-            up: [7, 9] 
-        };
+        let possibleMoves = [-7, -9, 7, 9];
 
-        Object.entries(possibleMoves).forEach(([upOrDown, moves]) => {    
-            if (piece.classList.contains(upOrDown)) {
-                moves.forEach(move => {
-                    let newIndex = cellIndex + move;
-                    
-                    if (board.children[newIndex] && board.children[newIndex].classList.contains('odd') && !board.children[newIndex].hasChildNodes()) {
-                        board.children[newIndex].classList.add('playable');
-                    }
-                });
+        possibleMoves.forEach(move => {
+            let newIndex = cellIndex + move;
+
+            while (board.children[newIndex] && board.children[newIndex].classList.contains('odd') && !board.children[newIndex].hasChildNodes()) {
+                board.children[newIndex].classList.add('playable');
+                newIndex += move;
             }
         });
     },
-    capture: function (cellIndex) {
+    capture: function (cellIndex, isDama = false) {
         let possibleMoves = [-7, -9, 7, 9];
+
+        if (isDama) {
+            return false;
+        }
 
         possibleMoves.forEach(move => {
             let newIndex = cellIndex + move;
