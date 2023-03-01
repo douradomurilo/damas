@@ -50,6 +50,7 @@ var game = {
                 
                     if (!piece.classList.contains('selected')) {
                         game.clearPlayable();
+                        deleteablePieces = [];
 
                         let selected = document.getElementsByClassName('selected')[0];
                         
@@ -61,7 +62,9 @@ var game = {
                         
                         let cell = piece.parentNode;
                         let cellIndex = Array.prototype.indexOf.call(board.children, cell);
+                        
                         game.capture(cellIndex);
+                        nonPlayable = [];
 
                         if (!deleteablePieces.length) {
                             game.pieceMoves(piece);
@@ -78,8 +81,6 @@ var game = {
     pieceMoves: function (piece) {
         let cell = piece.parentNode;
         let cellIndex = Array.prototype.indexOf.call(board.children, cell);
-
-        game.capture(cellIndex);
 
         const possibleMoves = {
             down: [-7, -9],
@@ -114,14 +115,13 @@ var game = {
                             deleteablePieces.push([adversaryPieceIndex, newIndex]);
                             nonPlayable.push(adversaryPieceIndex);
                             board.children[newIndex].classList.add('playable');
+                            board.children[cellIndex].classList.add('node');
                             game.capture(newIndex);
                         }
                     }
                 }
             }
         });
-
-        game.nonPlayable = [];
     },
     cellActions: function () {
         let playable = document.getElementsByClassName('playable');
@@ -130,7 +130,7 @@ var game = {
             playable[i].onclick = function () {
                 let selected = document.getElementsByClassName('selected')[0];
                 playable[i].appendChild(selected);
-                
+
                 if (deleteablePieces.length) {
                     let newIndex = Array.prototype.indexOf.call(board.children, playable[i]);
                     
@@ -140,6 +140,10 @@ var game = {
                             deleteablePieces.splice(index, 1);
                         }
                     });
+                }
+
+                if (!playable[i].classList.contains('node')) {
+                    deleteablePieces = [];
                 }
 
                 if (!deleteablePieces.length) {
@@ -173,6 +177,7 @@ var game = {
         let playable;
 
         while (playable = document.getElementsByClassName('playable')[0]) {
+            playable.classList.remove('node');
             playable.classList.remove('playable');
             playable.onclick = null;
         }
