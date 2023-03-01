@@ -148,7 +148,6 @@ var game = {
 
                 if (!deleteablePieces.length) {
                     let endNodeIndex = Array.prototype.indexOf.call(board.children, playable[i]);
-                    console.log(playable[i]);
                     
                     if ((selected.classList.contains('down') && endNodeIndex < 8) || (selected.classList.contains('up') && endNodeIndex > 55)) {
                         let crown = document.createElement('i');
